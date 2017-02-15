@@ -27,7 +27,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.storm.utils.Utils;
 import org.apache.storm.Config;
 
-public class ThriftClient {
+public class ThriftClient {  /**thrift客户端 和server通信*/
     private TTransport _transport;
     protected TProtocol _protocol;
     private String _host;

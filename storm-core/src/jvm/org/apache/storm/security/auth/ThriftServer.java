@@ -26,7 +26,7 @@ import org.apache.thrift.server.TServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThriftServer {
+public class ThriftServer {/**thrift server  接收来自client的请求*/
     private static final Logger LOG = LoggerFactory.getLogger(ThriftServer.class);
     private Map _storm_conf; //storm configuration
     protected TProcessor _processor = null;
