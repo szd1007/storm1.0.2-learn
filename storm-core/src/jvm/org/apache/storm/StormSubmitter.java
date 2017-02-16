@@ -48,7 +48,7 @@ import org.apache.storm.utils.Utils;
 public class StormSubmitter {
     public static final Logger LOG = LoggerFactory.getLogger(StormSubmitter.class);
 
-    private static final int THRIFT_CHUNK_SIZE_BYTES = 307200;
+    private static final int THRIFT_CHUNK_SIZE_BYTES = 307200;/**300Kb*/
 
     private static ILocalCluster localNimbus = null;/**本地模式*/
 
@@ -219,7 +219,7 @@ public class StormSubmitter {
             opts.set_creds(new Credentials(fullCreds));/**取到的证书信息存到stormOption中*/
         }
         try {
-            if(localNimbus!=null) {
+            if(localNimbus!=null) {/**这是从哪里初始化的？*/
                 LOG.info("Submitting topology " + name + " in local mode");
                 if(opts!=null) {
                     localNimbus.submitTopologyWithOpts(name, stormConf, topology, opts);
@@ -228,9 +228,9 @@ public class StormSubmitter {
                     localNimbus.submitTopology(name, stormConf, topology);
                 }
                 LOG.info("Finished submitting topology: " +  name);
-            } else {
+            } else {/**远程调用*/
                 String serConf = JSONValue.toJSONString(stormConf);
-                if(topologyNameExists(conf, name, asUser)) {
+                if(topologyNameExists(conf, name, asUser)) {/**判断是否已经存在相同名称的topology*/
                     throw new RuntimeException("Topology with name `" + name + "` already exists on cluster");
                 }
                 String jar = submitJarAs(conf, System.getProperty("storm.jar"), progressListener, asUser);
@@ -241,7 +241,7 @@ public class StormSubmitter {
                         client.getClient().submitTopologyWithOpts(name, jar, serConf, topology, opts);
                     } else {
                         // this is for backwards compatibility
-                        client.getClient().submitTopology(name, jar, serConf, topology);
+                        client.getClient().submitTopology(name, jar, serConf, topology);/**提交topology任务*/
                     }
                     LOG.info("Finished submitting topology: " + name);
                 } catch (InvalidTopologyException e) {
@@ -260,7 +260,7 @@ public class StormSubmitter {
     }
 
     /**
-     *
+     *调用用户提供的钩子函数
      * @param name
      * @param asUser
      * @param stormConf
@@ -280,9 +280,9 @@ public class StormSubmitter {
                 }
 
                 ISubmitterHook submitterHook = (ISubmitterHook) Class.forName(submissionNotifierClassName).newInstance();
-                TopologyInfo topologyInfo = Utils.getTopologyInfo(name, asUser, stormConf);
+                TopologyInfo topologyInfo = Utils.getTopologyInfo(name, asUser, stormConf);/**rpc取topology信息*/
                 LOG.info("Invoking the registered ISubmitterHook [{}]", submissionNotifierClassName);
-                submitterHook.notify(topologyInfo, stormConf, topology);
+                submitterHook.notify(topologyInfo, stormConf, topology);/**调用接口函数*/
             }
         } catch (Exception e) {
             LOG.warn("Error occurred in invoking submitter hook:[{}] ",submissionNotifierClassName, e);
@@ -331,7 +331,7 @@ public class StormSubmitter {
     /**
      * Submits a topology to run on the cluster with a progress bar. A topology runs forever or until
      * explicitly killed.
-     *
+     *默认实现了progressListener接口类中的方法，提供了默认实现
      *
      * @param name the name of the storm.
      * @param stormConf the topology-specific configuration. See {@link Config}.
@@ -366,7 +366,7 @@ public class StormSubmitter {
             }
         });
     }
-
+    /**远程调用*/
     private static boolean topologyNameExists(Map conf, String name, String asUser) {
         NimbusClient client = NimbusClient.getConfiguredClientAs(conf, asUser);
         try {
@@ -390,7 +390,7 @@ public class StormSubmitter {
     }
 
     /**
-     * Submit jar file
+     * Submit jar file  提交jar文件
      * @param conf the topology-specific configuration. See {@link Config}.
      * @param localJar file path of the jar file to submit
      * @return the remote location of the submitted jar
@@ -407,24 +407,24 @@ public class StormSubmitter {
 
         NimbusClient client = NimbusClient.getConfiguredClientAs(conf, asUser);
         try {
-            String uploadLocation = client.getClient().beginFileUpload();
+            String uploadLocation = client.getClient().beginFileUpload();/**获取nimbus上存储上传jar包的目录，具体逻辑service实现*/
             LOG.info("Uploading topology jar " + localJar + " to assigned location: " + uploadLocation);
             BufferFileInputStream is = new BufferFileInputStream(localJar, THRIFT_CHUNK_SIZE_BYTES);
 
             long totalSize = new File(localJar).length();
-            if (listener != null) {
+            if (listener != null) {/**回调接口中的相关方法，具体类实现可以传入*/
                 listener.onStart(localJar, uploadLocation, totalSize);
             }
 
             long bytesUploaded = 0;
-            while(true) {
+            while(true) {/**循环上传数据，每次上传固定块大小*/
                 byte[] toSubmit = is.read();
                 bytesUploaded += toSubmit.length;
                 if (listener != null) {
                     listener.onProgress(localJar, uploadLocation, bytesUploaded, totalSize);
                 }
 
-                if(toSubmit.length==0) break;
+                if(toSubmit.length==0) break;/**thrift的binary类型对应ByteBuffer对象*/
                 client.getClient().uploadChunk(uploadLocation, ByteBuffer.wrap(toSubmit));
             }
             client.getClient().finishFileUpload(uploadLocation);

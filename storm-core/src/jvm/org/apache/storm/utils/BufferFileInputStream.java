@@ -44,7 +44,7 @@ public class BufferFileInputStream {
         } else if(length==buffer.length) {
             return buffer;
         } else {
-            return Arrays.copyOf(buffer, length);
+            return Arrays.copyOf(buffer, length);/**没有读满缓冲区，只返回读到的数据*/
         }
     }
 
