@@ -50,7 +50,7 @@ public class StormSubmitter {
 
     private static final int THRIFT_CHUNK_SIZE_BYTES = 307200;
 
-    private static ILocalCluster localNimbus = null;
+    private static ILocalCluster localNimbus = null;/**本地模式*/
 
     private static String generateZookeeperDigestSecretPayload() {
         return Utils.secureRandomLong() + ":" + Utils.secureRandomLong();
@@ -67,7 +67,7 @@ public class StormSubmitter {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map prepareZookeeperAuthentication(Map conf) {
+    public static Map prepareZookeeperAuthentication(Map conf) {/**zk配置相关，如果配置文件没有则创建*/
         Map toRet = new HashMap();
 
         // Is the topology ZooKeeper authentication configuration unset?
@@ -86,7 +86,7 @@ public class StormSubmitter {
 
         return toRet;
     }
-
+    /**证书相关  通过反射生成配置的IAutoCredentials接口实现类 */
     private static Map<String,String> populateCredentials(Map conf, Map<String, String> creds) {
         Map<String,String> ret = new HashMap<>();
         for (IAutoCredentials autoCred: AuthUtils.GetAutoCredentials(conf)) {
@@ -112,22 +112,22 @@ public class StormSubmitter {
             throws AuthorizationException, NotAliveException, InvalidTopologyException {
         stormConf = new HashMap(stormConf);
         stormConf.putAll(Utils.readCommandLineOpts());
-        Map conf = Utils.readStormConfig();
+        Map conf = Utils.readStormConfig();/**读取配置文件 storm.yaml */
         conf.putAll(stormConf);
-        Map<String,String> fullCreds = populateCredentials(conf, credentials);
+        Map<String,String> fullCreds = populateCredentials(conf, credentials);/**获取增加证书信息*/
         if (fullCreds.isEmpty()) {
             LOG.warn("No credentials were found to push to " + name);
             return;
         }
         try {
-            if(localNimbus!=null) {
+            if(localNimbus!=null) { /**本地模式*/
                 LOG.info("Pushing Credentials to topology " + name + " in local mode");
                 localNimbus.uploadNewCredentials(name, new Credentials(fullCreds));
             } else {
-                NimbusClient client = NimbusClient.getConfiguredClient(conf);
+                NimbusClient client = NimbusClient.getConfiguredClient(conf);/**和nimbus的leader建立连接*/
                 try {
                     LOG.info("Uploading new credentials to " +  name);
-                    client.getClient().uploadNewCredentials(name, new Credentials(fullCreds));
+                    client.getClient().uploadNewCredentials(name, new Credentials(fullCreds));/**调用rpc方法，服务端实现是clj代码*/
                 } finally {
                     client.close();
                 }
@@ -141,7 +141,7 @@ public class StormSubmitter {
 
     /**
      * Submits a topology to run on the cluster. A topology runs forever or until
-     * explicitly killed.
+     * explicitly killed.  向集群提交topology
      *
      *
      * @param name the name of the storm.
@@ -151,7 +151,7 @@ public class StormSubmitter {
      * @throws InvalidTopologyException if an invalid topology was submitted
      * @throws AuthorizationException if authorization is failed
      * @thorws SubmitterHookException if any Exception occurs during initialization or invocation of registered {@link ISubmitterHook}
-     */
+     */  /**提供一个大而全的方法，和一批指定默认参数的方法，给用户暴露尽量少的内部参数*/
     public static void submitTopology(String name, Map stormConf, StormTopology topology)
             throws AlreadyAliveException, InvalidTopologyException, AuthorizationException {
         submitTopology(name, stormConf, topology, null, null);
@@ -195,13 +195,13 @@ public class StormSubmitter {
             throws AlreadyAliveException, InvalidTopologyException, AuthorizationException, IllegalArgumentException {
         if(!Utils.isValidConf(stormConf)) {
             throw new IllegalArgumentException("Storm conf is not valid. Must be json-serializable");
-        }
+        }/**读配置*/
         stormConf = new HashMap(stormConf);
         stormConf.putAll(Utils.readCommandLineOpts());
         Map conf = Utils.readStormConfig();
         conf.putAll(stormConf);
         stormConf.putAll(prepareZookeeperAuthentication(conf));
-
+        /**验证配置是否正确，其中需要查看提交的最大堆参数是否小于配置的值*/
         validateConfs(conf, topology);
 
         Map<String,String> passedCreds = new HashMap<>();
@@ -216,7 +216,7 @@ public class StormSubmitter {
             if (opts == null) {
                 opts = new SubmitOptions(TopologyInitialStatus.ACTIVE);
             }
-            opts.set_creds(new Credentials(fullCreds));
+            opts.set_creds(new Credentials(fullCreds));/**取到的证书信息存到stormOption中*/
         }
         try {
             if(localNimbus!=null) {

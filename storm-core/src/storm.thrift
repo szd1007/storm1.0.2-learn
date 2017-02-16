@@ -374,7 +374,7 @@ enum TopologyInitialStatus {
     ACTIVE = 1,
     INACTIVE = 2
 }
-struct SubmitOptions {
+struct SubmitOptions {/**向集群提交任务的的时候会用到*/
   1: required TopologyInitialStatus initial_status;
   2: optional Credentials creds;
 }

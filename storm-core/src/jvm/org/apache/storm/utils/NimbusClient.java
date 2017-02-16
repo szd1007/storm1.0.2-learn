@@ -74,7 +74,7 @@ public class NimbusClient extends ThriftClient {/**负责和nimbus server通信*
             if (nimbuses != null) {
                 for (NimbusSummary nimbusSummary : nimbuses) {
                     if (nimbusSummary.is_isLeader()) {
-                        try {/**找到leader节点，与其建立连接。一旦成功建立则推出循环*/
+                        try {/**找到leader节点，与其建立连接。一旦成功建立则推出循环,如果上来连接的就是leader节点就没必要执行这里了吧*/
                             return new NimbusClient(conf, nimbusSummary.get_host(), nimbusSummary.get_port(), null, asUser);
                         } catch (TTransportException e) {
                             String leaderNimbus = nimbusSummary.get_host() + ":" + nimbusSummary.get_port();
