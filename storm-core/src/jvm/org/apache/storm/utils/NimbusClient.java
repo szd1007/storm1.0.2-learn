@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
-public class NimbusClient extends ThriftClient {
+public class NimbusClient extends ThriftClient {/**负责和nimbus server通信*/
     private Nimbus.Client _client;
     private static final Logger LOG = LoggerFactory.getLogger(NimbusClient.class);
 
@@ -50,7 +50,7 @@ public class NimbusClient extends ThriftClient {
             asUser = (String) conf.get(Config.STORM_DO_AS_USER);
         }
 
-        List<String> seeds;
+        List<String> seeds;/**下面跟着的代码是从配置文件storm.yaml读取seeds配置*/
         if(conf.containsKey(Config.NIMBUS_HOST)) {
             LOG.warn("Using deprecated config {} for backward compatibility. Please update your storm.yaml so it only has config {}",
                     Config.NIMBUS_HOST, Config.NIMBUS_SEEDS);
@@ -60,7 +60,7 @@ public class NimbusClient extends ThriftClient {
         }
 
         for (String host : seeds) {
-            int port = Integer.parseInt(conf.get(Config.NIMBUS_THRIFT_PORT).toString());
+            int port = Integer.parseInt(conf.get(Config.NIMBUS_THRIFT_PORT).toString());/**获取端口*/
             ClusterSummary clusterInfo;
             try {
                 NimbusClient client = new NimbusClient(conf, host, port, null, asUser);
@@ -70,11 +70,11 @@ public class NimbusClient extends ThriftClient {
                         + ". will retry with a different seed host.", e);
                 continue;
             }
-            List<NimbusSummary> nimbuses = clusterInfo.get_nimbuses();
+            List<NimbusSummary> nimbuses = clusterInfo.get_nimbuses();/**里面有每个nimbus的具体信息，包含isleader信息*/
             if (nimbuses != null) {
                 for (NimbusSummary nimbusSummary : nimbuses) {
                     if (nimbusSummary.is_isLeader()) {
-                        try {
+                        try {/**找到leader节点，与其建立连接。一旦成功建立则推出循环*/
                             return new NimbusClient(conf, nimbusSummary.get_host(), nimbusSummary.get_port(), null, asUser);
                         } catch (TTransportException e) {
                             String leaderNimbus = nimbusSummary.get_host() + ":" + nimbusSummary.get_port();
