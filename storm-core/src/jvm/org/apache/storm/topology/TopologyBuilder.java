@@ -95,7 +95,7 @@ import static org.apache.storm.spout.CheckpointSpout.CHECKPOINT_STREAM_ID;
  *
  * The pattern for `TopologyBuilder` is to map component ids to components using the setSpout
  * and setBolt methods. Those methods return objects that are then used to declare
- * the inputs for that component.
+ * the inputs for that component.        java代码构建thrift结构体的topology
  */
 public class TopologyBuilder {
     private Map<String, IRichBolt> _bolts = new HashMap<>();

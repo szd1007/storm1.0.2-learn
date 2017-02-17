@@ -110,7 +110,7 @@ struct StateSpoutSpec {
   1: required ComponentObject state_spout_object;
   2: required ComponentCommon common;
 }
-
+/**thrift定义的结构体，无论何种语言只要能构建如下结构体就ok*/
 struct StormTopology {
   //ids must be unique across maps
   // #workers to use is in conf
