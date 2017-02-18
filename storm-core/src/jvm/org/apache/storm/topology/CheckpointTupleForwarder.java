@@ -36,7 +36,7 @@ import static org.apache.storm.spout.CheckPointState.Action;
 import static org.apache.storm.spout.CheckPointState.Action.ROLLBACK;
 import static org.apache.storm.spout.CheckpointSpout.*;
 
-/**
+/**  这个类就相当于适配器模式，让普通的非statefulBolt可以在整个框架中传递，传递checkpoint tuples  ，调用包装的bolt
  * Wraps {@link IRichBolt} and forwards checkpoint tuples in a
  * stateful topology.
  * <p>
@@ -77,7 +77,7 @@ public class CheckpointTupleForwarder extends BaseStatefulBoltExecutor {
 
     /**
      * Forwards the checkpoint tuple downstream.
-     *
+     * 模版模式，  具体的实现由子类实现，父类写好实现逻辑
      * @param checkpointTuple  the checkpoint tuple
      * @param action the action (prepare, commit, rollback or initstate)
      * @param txid   the transaction id.

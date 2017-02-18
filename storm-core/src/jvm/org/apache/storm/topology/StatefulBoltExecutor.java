@@ -164,7 +164,7 @@ public class StatefulBoltExecutor<T extends State> extends BaseStatefulBoltExecu
             tuples.clear();
         }
     }
-
+    /**包装接收到的OutputCollector  ，做他的代理类*/
     private static class AckTrackingOutputCollector extends AnchoringOutputCollector {
         private final OutputCollector delegate;
         private final Queue<Tuple> ackedTuples;
