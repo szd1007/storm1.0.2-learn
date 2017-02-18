@@ -184,7 +184,7 @@ public class StatefulBoltExecutor<T extends State> extends BaseStatefulBoltExecu
             }
             return result;
         }
-
+        /***这个是在哪里调用的呢*/
         @Override
         public void ack(Tuple input) {
             ackedTuples.add(input);
