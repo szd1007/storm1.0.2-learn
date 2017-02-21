@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
+/** 我理解的是每个bolt 或者spout都有一个独立的keyValueState对象  spout的ack只会anchor其处理过程中的bolt
  * A redis based implementation that persists the state in Redis.
  */
 public class RedisKeyValueState<K, V> implements KeyValueState<K, V> {
