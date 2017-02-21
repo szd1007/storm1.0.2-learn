@@ -38,11 +38,11 @@ import static org.apache.storm.spout.CheckPointState.Action;
 /**
  * Emits checkpoint tuples which is used to save the state of the {@link org.apache.storm.topology.IStatefulComponent}
  * across the topology. If a topology contains Stateful bolts, Checkpoint spouts are automatically added
- * to the topology. There is only one Checkpoint task per topology.
+ * to the topology(topologyBuilder构建过程中添加的). There is only one Checkpoint task per topology.
  * Checkpoint spout stores its internal state in a {@link KeyValueState}.
  *
  * @see CheckPointState
- */
+ *///todo 看看keyvalueState   redis的实现 
 public class CheckpointSpout extends BaseRichSpout {
     private static final Logger LOG = LoggerFactory.getLogger(CheckpointSpout.class);
 
@@ -84,7 +84,7 @@ public class CheckpointSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        if (shouldRecover()) {
+        if (shouldRecover()) {/**默认开始走这个逻辑*/
             handleRecovery();
             startProgress();
         } else if (shouldCheckpoint()) {
@@ -96,12 +96,12 @@ public class CheckpointSpout extends BaseRichSpout {
     }
 
     @Override
-    public void ack(Object msgId) {
+    public void ack(Object msgId) {/**完成整个拓扑流程后，会回调该方法*/
         LOG.debug("Got ack with txid {}, current txState {}", msgId, curTxState);
         if (curTxState.getTxid() == ((Number) msgId).longValue()) {
             if (recovering) {
                 handleRecoveryAck();
-            } else {
+            } else {/**完成恢复过程*/
                 handleCheckpointAck();
             }
         } else {

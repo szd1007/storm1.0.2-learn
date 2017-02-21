@@ -66,7 +66,7 @@ public class StatefulBoltExecutor<T extends State> extends BaseStatefulBoltExecu
     void prepare(Map stormConf, TopologyContext context, OutputCollector collector, State state) {
         init(context, collector);
         this.collector = new AckTrackingOutputCollector(collector);
-        bolt.prepare(stormConf, context, this.collector);
+        bolt.prepare(stormConf, context, this.collector);/**这里已经进行了类包装，ack方法进行了重写*/
         this.state = state;
     }
 
