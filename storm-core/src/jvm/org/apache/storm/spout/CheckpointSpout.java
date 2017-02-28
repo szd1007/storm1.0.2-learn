@@ -42,7 +42,7 @@ import static org.apache.storm.spout.CheckPointState.Action;
  * Checkpoint spout stores its internal state in a {@link KeyValueState}.
  *
  * @see CheckPointState
- *///todo 看看keyvalueState   redis的实现 
+ *///todo 看看keyvalueState   redis的实现
 public class CheckpointSpout extends BaseRichSpout {
     private static final Logger LOG = LoggerFactory.getLogger(CheckpointSpout.class);
 
