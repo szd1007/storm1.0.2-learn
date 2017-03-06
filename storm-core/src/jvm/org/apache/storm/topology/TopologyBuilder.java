@@ -180,7 +180,7 @@ public class TopologyBuilder {
         validateUnusedId(id);
         initCommon(id, bolt, parallelism_hint);
         _bolts.put(id, bolt);
-        return new BoltGetter(id);
+        return new BoltGetter(id);/**返回的是一个实现类boltdeclarer的内部类，虽然内部类是protecetd 但是仍可以通过接口访问，面向接口编程，nice*/
     }
 
     /**
